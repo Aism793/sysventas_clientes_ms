@@ -1,0 +1,40 @@
+version: '3.1'
+
+services:
+  # database engine service
+  docker-mysql:
+    container_name: docker-mysql-sysventas-ms
+    image: "mysql:8.0"
+    restart: always
+    environment:
+      MYSQL_DATABASE: sysventas_clientes_db
+      MYSQL_USER: sysventas
+      MYSQL_PASSWORD: root
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - 33061:3306
+
+  # database admin service
+  adminer:
+    container_name: adminer-sysventas
+    image: adminer
+    restart: always
+    depends_on:
+      - docker-mysql-sysventas-ms
+    ports:
+      - 9091:8080
+
+  # backend service
+  sysventas-clientes-ms:
+    build: .
+    image: sysventas-clientes-ms
+    restart: always
+    container_name: sysventas-clientes-ms
+    ports:
+      - 8099:8099
+    depends_on:
+      - docker-mysql-sysventas-ms
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://docker-mysql-sysventas-ms:3306/sysventas_clientes_db?serverTimezone=UTC
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root
