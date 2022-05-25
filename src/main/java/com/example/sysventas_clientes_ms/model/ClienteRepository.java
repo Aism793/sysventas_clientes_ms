@@ -19,4 +19,11 @@ public interface ClienteRepository extends CrudRepository<Cliente, Long>{
 	@Transactional
 	@Query("FROM Cliente c WHERE c.cedula = :cedula")
 	public Optional<Cliente> findClienteByCode(String cedula);
+	
+	@Transactional
+	@Query("FROM Cliente c  WHERE c.estado ='Activo' ORDER BY c.primerNombre, c.segundoNombre")
+	public List<Cliente> findClientesActivos();
+	@Transactional
+	@Query("FROM Cliente c  WHERE c.estado ='Inactivo' ORDER BY c.primerNombre, c.segundoNombre")
+	public List<Cliente> findClientesInactivos();
 }

@@ -11,8 +11,12 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.bind.DefaultValue;
+
 import com.fasterxml.jackson.annotation.JsonView;
 
+import lombok.Builder.Default;
 import lombok.Data;
 
 @Entity()
@@ -51,6 +55,10 @@ public class Cliente {
 	@NotBlank
 	@Size(max = 100)
 	private String direccion;
+	
+	
+	@Size(max = 10)
+	private String estado;
 
 	public Long getId() {
 		return id;
@@ -122,5 +130,12 @@ public class Cliente {
 
 	public void setDireccion(String direccion) {
 		this.direccion = direccion;
+	}
+	public String getEstado() {
+		return estado;
+	}
+
+	public void setEstado(String estado) {
+		this.estado = estado;
 	}
 }

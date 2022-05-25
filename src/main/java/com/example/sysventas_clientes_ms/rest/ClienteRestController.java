@@ -19,6 +19,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -46,6 +47,18 @@ public class ClienteRestController {
 	public List<Cliente> listClientes() {		
 		
 		return clienteRepository.findClientesOrderByName();
+	}
+	
+	@GetMapping("/listActivos")
+	public List<Cliente> listClientesActivos() {		
+		
+		return clienteRepository.findClientesActivos();
+	}
+	
+	@GetMapping("/listInactivos")
+	public List<Cliente> listClientesInactivos() {		
+		
+		return clienteRepository.findClientesInactivos();
 	}
 	
 	@GetMapping
@@ -82,7 +95,7 @@ public class ClienteRestController {
 				clienteResponse = new ClienteResponse(null, "Not OK", "true", "Ya existe un cliente con esa cédula");
 				
 			}else {
-				
+				cliente.setEstado("Activo");
 				clienteRepository.save(cliente);
 				clienteResponse = new ClienteResponse(cliente, "OK", "false", "Cliente registrado correctamente");
 			}							
@@ -95,6 +108,82 @@ public class ClienteRestController {
 		
 		return clienteResponse;
 	}
+
+	@Transactional
+	@PutMapping("/update")
+	public ClienteResponse updateCliente(@RequestBody @Valid Cliente cliente, BindingResult bindingResult) {		
+				
+		loggerInfo(cliente, "Actualizar cliente.", "Web client.\n");
+		
+		ClienteResponse clienteResponse = null;
+		
+		try {
+			
+			if (bindingResult.hasErrors()) {
+				clienteResponse = new ClienteResponse(null, "Not OK", "true", "Hay errores en los campos del cliente");					
+				loggerMessage(clienteResponse.getMessage());					
+				return clienteResponse;
+			}
+			
+			Optional<Cliente> optCliente = clienteRepository.findClienteByCode(cliente.getCedula());
+			
+			if (!optCliente.isPresent()) {
+				
+				clienteResponse = new ClienteResponse(null, "Not OK", "true", "No existe un cliente con esa cédula");
+				
+			}else {
+				optCliente.get().setPrimerNombre(cliente.getPrimerNombre());
+				optCliente.get().setSegundoNombre(cliente.getSegundoNombre());
+				optCliente.get().setPrimerApellido(cliente.getPrimerApellido());
+				optCliente.get().setSegundoApellido(cliente.getSegundoApellido());
+				optCliente.get().setCorreo(cliente.getCorreo());
+				optCliente.get().setTelefono(cliente.getTelefono());
+				optCliente.get().setDireccion(cliente.getDireccion());
+				
+				clienteRepository.save(optCliente.get());
+				clienteResponse = new ClienteResponse(cliente, "OK", "false", "Cliente Actualizado correctamente");
+			}							
+		
+		} catch (Exception ex) {
+			clienteResponse = new ClienteResponse(null, "Not OK", "true", ex.getMessage());	
+		}
+		
+		loggerMessage(clienteResponse.getMessage());			
+		
+		return clienteResponse;
+	}
+
+	//
+	
+	@Transactional
+	@PutMapping("/disable")
+	public ClienteResponse  disableCliente(@RequestParam(name = "cedula") String cedula){		
+				
+		Optional<Cliente> cliente = clienteRepository.findClienteByCode(cedula);
+		
+		ClienteResponse clienteResponse = null;
+		
+		try {
+			
+			if(!cliente.isPresent()) {
+				clienteResponse = new ClienteResponse(null, "Not OK", "true", "No existe un cliente con esa cédula");
+			}	
+			else {
+				
+				cliente.get().setEstado("Inactivo");
+				clienteRepository.save(cliente.get());
+				clienteResponse = new ClienteResponse(cliente.get(), "OK", "false", "Cliente Desativado correctamente");
+			}							
+		
+		} catch (Exception ex) {
+			clienteResponse = new ClienteResponse(null, "Not OK", "true", ex.getMessage());	
+		}
+		
+		loggerMessage(clienteResponse.getMessage());			
+		
+		return clienteResponse;
+	}
+	//
 	
 	public void loggerInfo(Object obj, String action, String client) {
 		
