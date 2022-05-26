@@ -74,7 +74,7 @@ public class ClienteRestController {
 	
 	@Transactional
 	@PostMapping("/add")
-	public ClienteResponse saveCliente(@RequestBody @Valid Cliente cliente, BindingResult bindingResult) {		
+	public ResponseEntity<ClienteResponse> saveCliente(@RequestBody @Valid Cliente cliente, BindingResult bindingResult) {		
 				
 		loggerInfo(cliente, "Guardar cliente.", "Web client.\n");
 		
@@ -85,7 +85,7 @@ public class ClienteRestController {
 			if (bindingResult.hasErrors()) {
 				clienteResponse = new ClienteResponse(null, "Not OK", "true", "Hay errores en los campos del cliente");					
 				loggerMessage(clienteResponse.getMessage());					
-				return clienteResponse;
+				return ResponseEntity.badRequest().body(clienteResponse);
 			}
 			
 			Optional<Cliente> optCliente = clienteRepository.findClienteByCode(cliente.getCedula());
@@ -93,25 +93,27 @@ public class ClienteRestController {
 			if (optCliente.isPresent()) {
 				
 				clienteResponse = new ClienteResponse(null, "Not OK", "true", "Ya existe un cliente con esa cédula");
-				
+				return ResponseEntity.badRequest().body(clienteResponse);
 			}else {
 				cliente.setEstado("Activo");
 				clienteRepository.save(cliente);
 				clienteResponse = new ClienteResponse(cliente, "OK", "false", "Cliente registrado correctamente");
+				
 			}							
 		
 		} catch (Exception ex) {
 			clienteResponse = new ClienteResponse(null, "Not OK", "true", ex.getMessage());	
+			return ResponseEntity.badRequest().body(clienteResponse);
 		}
 		
 		loggerMessage(clienteResponse.getMessage());			
 		
-		return clienteResponse;
+		return ResponseEntity.ok().body(clienteResponse);
 	}
 
 	@Transactional
 	@PutMapping("/update")
-	public ClienteResponse updateCliente(@RequestBody @Valid Cliente cliente, BindingResult bindingResult) {		
+	public ResponseEntity<ClienteResponse> updateCliente(@RequestBody @Valid Cliente cliente, BindingResult bindingResult) {		
 				
 		loggerInfo(cliente, "Actualizar cliente.", "Web client.\n");
 		
@@ -122,7 +124,7 @@ public class ClienteRestController {
 			if (bindingResult.hasErrors()) {
 				clienteResponse = new ClienteResponse(null, "Not OK", "true", "Hay errores en los campos del cliente");					
 				loggerMessage(clienteResponse.getMessage());					
-				return clienteResponse;
+				return ResponseEntity.badRequest().body(clienteResponse);
 			}
 			
 			Optional<Cliente> optCliente = clienteRepository.findClienteByCode(cliente.getCedula());
@@ -130,6 +132,7 @@ public class ClienteRestController {
 			if (!optCliente.isPresent()) {
 				
 				clienteResponse = new ClienteResponse(null, "Not OK", "true", "No existe un cliente con esa cédula");
+				return ResponseEntity.badRequest().body(clienteResponse);
 				
 			}else {
 				optCliente.get().setPrimerNombre(cliente.getPrimerNombre());
@@ -146,18 +149,19 @@ public class ClienteRestController {
 		
 		} catch (Exception ex) {
 			clienteResponse = new ClienteResponse(null, "Not OK", "true", ex.getMessage());	
+			return ResponseEntity.badRequest().body(clienteResponse);
 		}
 		
 		loggerMessage(clienteResponse.getMessage());			
 		
-		return clienteResponse;
+		return ResponseEntity.ok().body(clienteResponse);
 	}
 
 	//
 	
 	@Transactional
 	@PutMapping("/disable")
-	public ClienteResponse  disableCliente(@RequestParam(name = "cedula") String cedula){		
+	public ResponseEntity<ClienteResponse>  disableCliente(@RequestParam(name = "cedula") String cedula){		
 				
 		Optional<Cliente> cliente = clienteRepository.findClienteByCode(cedula);
 		
@@ -167,6 +171,7 @@ public class ClienteRestController {
 			
 			if(!cliente.isPresent()) {
 				clienteResponse = new ClienteResponse(null, "Not OK", "true", "No existe un cliente con esa cédula");
+				return ResponseEntity.badRequest().body(clienteResponse);
 			}	
 			else {
 				
@@ -177,11 +182,12 @@ public class ClienteRestController {
 		
 		} catch (Exception ex) {
 			clienteResponse = new ClienteResponse(null, "Not OK", "true", ex.getMessage());	
+			return ResponseEntity.badRequest().body(clienteResponse);
 		}
 		
 		loggerMessage(clienteResponse.getMessage());			
 		
-		return clienteResponse;
+		return ResponseEntity.ok().body(clienteResponse);
 	}
 	//
 	
