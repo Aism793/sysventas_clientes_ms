@@ -92,7 +92,7 @@ public class ClienteRestController {
 			
 			if (optCliente.isPresent()) {
 				
-				clienteResponse = new ClienteResponse(null, "Not OK", "true", "Ya existe un cliente con esa cédula");
+				clienteResponse = new ClienteResponse(null, "Not OK", "true", "Ya existe un cliente registrado con esa cédula");
 				return ResponseEntity.badRequest().body(clienteResponse);
 			}else {
 				cliente.setEstado("Activo");
